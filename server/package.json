@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "description": "Backend for StockVision app",
   "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "server": "nodemon server.js",
-    "client": "npm start --prefix ../",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
-  },
+  
+    "scripts": {
+      "dev": "concurrently \"npm run server\" \"npm run client\"",
+      "server": "nodemon server.js",
+      "client": "cd .. && npm run dev",
+      "start": "node server.js"
+    },
+  
   "author": "",
   "license": "MIT",
   "dependencies": {
