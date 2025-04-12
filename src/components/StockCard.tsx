@@ -1,7 +1,9 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowUpRight, ArrowDownRight, Star } from 'lucide-react';
-import { Stock, StockService, WatchlistService } from '@/services/StockData';
+import { Stock, StockService } from '@/services/StockData';
+import { AuthService } from '@/services/AuthService';
+import { useToast } from "@/components/ui/use-toast";
 
 interface StockCardProps {
   stock: Stock;
@@ -15,19 +17,63 @@ const StockCard: React.FC<StockCardProps> = ({
   refreshWatchlist
 }) => {
   const isPositive = stock.change >= 0;
-  const isInWatchlist = WatchlistService.isInWatchlist(stock.symbol);
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
   
-  const handleWatchlistToggle = (e: React.MouseEvent) => {
+  useEffect(() => {
+    const checkWatchlist = async () => {
+      if (AuthService.isAuthenticated()) {
+        const watchlist = await AuthService.getWatchlist();
+        setIsInWatchlist(watchlist.includes(stock.symbol));
+      }
+    };
+    
+    checkWatchlist();
+  }, [stock.symbol]);
+  
+  const handleWatchlistToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    if (isInWatchlist) {
-      WatchlistService.removeFromWatchlist(stock.symbol);
-    } else {
-      WatchlistService.addToWatchlist(stock.symbol);
+    if (!AuthService.isAuthenticated()) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to manage your watchlist",
+        variant: "destructive",
+      });
+      return;
     }
     
-    if (refreshWatchlist) {
-      refreshWatchlist();
+    setIsLoading(true);
+    
+    try {
+      if (isInWatchlist) {
+        await AuthService.removeFromWatchlist(stock.symbol);
+        setIsInWatchlist(false);
+        toast({
+          title: "Removed from watchlist",
+          description: `${stock.symbol} has been removed from your watchlist.`,
+        });
+      } else {
+        await AuthService.addToWatchlist(stock.symbol);
+        setIsInWatchlist(true);
+        toast({
+          title: "Added to watchlist",
+          description: `${stock.symbol} has been added to your watchlist.`,
+        });
+      }
+      
+      if (refreshWatchlist) {
+        refreshWatchlist();
+      }
+    } catch (error) {
+      toast({
+        title: "Operation failed",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -42,7 +88,8 @@ const StockCard: React.FC<StockCardProps> = ({
             <h3 className="text-lg font-bold">{stock.symbol}</h3>
             <button 
               onClick={handleWatchlistToggle}
-              className="p-1 rounded-full hover:bg-gray-100"
+              className={`p-1 rounded-full hover:bg-gray-100 ${isLoading ? 'opacity-50' : ''}`}
+              disabled={isLoading}
             >
               <Star 
                 className={`w-4 h-4 ${isInWatchlist ? 'text-yellow-500 fill-yellow-500' : 'text-gray-400'}`} 
@@ -56,9 +103,9 @@ const StockCard: React.FC<StockCardProps> = ({
           <p className="text-lg font-bold">${stock.price.toFixed(2)}</p>
           <div className={`flex items-center text-sm ${isPositive ? 'text-stock-up' : 'text-stock-down'}`}>
             {isPositive ? (
-              <ArrowUpRight className="w-4 h-4 mr-1" />
+              <ArrowUpRight className="w-4 w-4 mr-1" />
             ) : (
-              <ArrowDownRight className="w-4 h-4 mr-1" />
+              <ArrowDownRight className="w-4 w-4 mr-1" />
             )}
             <span>{StockService.formatPriceChange(stock.change)}</span>
             <span className="ml-1">({StockService.formatPercentChange(stock.changePercent)})</span>

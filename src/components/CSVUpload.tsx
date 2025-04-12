@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
+import { ApiStockService } from '@/services/ApiStockService';
+import { AuthService } from '@/services/AuthService';
 
 const CSVUpload: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -17,6 +19,15 @@ const CSVUpload: React.FC = () => {
   };
 
   const handleUpload = async () => {
+    if (!AuthService.isAuthenticated()) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to upload stock data",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!file) {
       toast({
         title: "No file selected",
@@ -38,25 +49,12 @@ const CSVUpload: React.FC = () => {
 
     setIsLoading(true);
 
-    // Create form data
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
-      const response = await fetch('http://localhost:5000/api/stocks/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await response.json();
+      const response = await ApiStockService.uploadCSV(file);
       
-      if (!response.ok) {
-        throw new Error(data.msg || 'Something went wrong');
-      }
-
       toast({
         title: "Upload successful",
-        description: `${data.count} stocks have been uploaded to the database`,
+        description: `${response.count} stocks have been uploaded to the database`,
       });
 
       setFile(null);
@@ -101,6 +99,12 @@ const CSVUpload: React.FC = () => {
         {file && (
           <div className="text-sm text-gray-600">
             Selected file: <span className="font-medium">{file.name}</span> ({(file.size / 1024).toFixed(2)} KB)
+          </div>
+        )}
+        
+        {!AuthService.isAuthenticated() && (
+          <div className="text-sm text-amber-600">
+            Note: You need to be logged in to upload stock data.
           </div>
         )}
       </div>
