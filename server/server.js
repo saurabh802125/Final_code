@@ -15,6 +15,7 @@ app.use(cors());
 
 // Define Routes
 app.use('/api/stocks', require('./routes/api/stocks'));
+app.use('/api/users', require('./routes/api/users'));
 
 // Create uploads directory if it doesn't exist
 const fs = require('fs');

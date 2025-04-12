@@ -5,6 +5,7 @@ const multer = require('multer');
 const csv = require('csv-parser');
 const fs = require('fs');
 const Stock = require('../../models/Stock');
+const auth = require('../../middleware/auth');
 
 // Set up multer for file uploads
 const upload = multer({ dest: 'uploads/' });
@@ -42,8 +43,8 @@ router.get('/:symbol', async (req, res) => {
 
 // @route   POST api/stocks/upload
 // @desc    Upload and process CSV file
-// @access  Public
-router.post('/upload', upload.single('file'), async (req, res) => {
+// @access  Private
+router.post('/upload', auth, upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ msg: 'No file uploaded' });
   }
