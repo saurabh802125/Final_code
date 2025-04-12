@@ -69,19 +69,38 @@ export const ApiStockService = {
     const formData = new FormData();
     formData.append('file', file);
     
-    const response = await fetch(`${API_URL}/stocks/upload`, {
-      method: 'POST',
-      headers: {
-        'x-auth-token': token,
-      },
-      body: formData,
-    });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.msg || 'Upload failed');
+    try {
+      const response = await fetch('/api/stocks/upload', {
+        method: 'POST',
+        headers: {
+          'x-auth-token': token,
+        },
+        body: formData,
+      });
+      
+      // Log the raw response for debugging
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
+      
+      // Try to parse the response
+      let responseData;
+      try {
+        responseData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse response:', parseError);
+        console.error('Response text:', responseText);
+        throw new Error('Invalid server response');
+      }
+      
+      if (!response.ok) {
+        console.error('Server error response:', responseData);
+        throw new Error(responseData.msg || 'Upload failed');
+      }
+      
+      return responseData;
+    } catch (error) {
+      console.error('Upload error:', error);
+      throw error;
     }
-    
-    return await response.json();
   }
 };

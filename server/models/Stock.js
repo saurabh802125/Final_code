@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const StockPriceSchema = new mongoose.Schema({
@@ -17,7 +16,7 @@ const StockSchema = new mongoose.Schema({
   change: { type: Number, required: true },
   changePercent: { type: Number, required: true },
   sector: { type: String, required: true },
-  marketCap: { type: Number, required: true },
+  marketCap: { type: Number, default: 0 },
   prices: [StockPriceSchema]
 });
 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,17 +30,17 @@ const CSVUpload: React.FC = () => {
     if (!file) {
       toast({
         title: "No file selected",
-        description: "Please select a CSV file to upload",
+        description: "Please select a CSV or TXT file to upload",
         variant: "destructive",
       });
       return;
     }
 
-    // Check if file is CSV
-    if (!file.name.endsWith('.csv')) {
+    // Check if file is CSV or TXT
+    if (!file.name.toLowerCase().endsWith('.csv') && !file.name.toLowerCase().endsWith('.txt')) {
       toast({
         title: "Invalid file format",
-        description: "Please upload a CSV file",
+        description: "Please upload a CSV or TXT file",
         variant: "destructive",
       });
       return;
@@ -58,7 +57,6 @@ const CSVUpload: React.FC = () => {
       });
 
       setFile(null);
-      // You might want to trigger a data refresh here
     } catch (error) {
       console.error('Upload error:', error);
       toast({
@@ -75,14 +73,14 @@ const CSVUpload: React.FC = () => {
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h2 className="text-xl font-bold mb-4">Upload Stock Data</h2>
       <p className="text-gray-600 mb-4">
-        Upload a CSV file containing stock data. The file should include headers for symbol, name, price, etc.
+        Upload a CSV or TXT file containing stock data with tab-separated values.
       </p>
       
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-4">
           <Input
             type="file"
-            accept=".csv"
+            accept=".csv,.txt"
             onChange={handleFileChange}
             className="flex-1"
           />
