@@ -133,8 +133,8 @@ const Index = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <div className="bg-stock-blue-dark text-white py-2 px-4 flex justify-end space-x-2">
-        {AuthService.isAuthenticated() ? <UserMenu /> : <AuthModal />}
-      </div>
+  {AuthService.isAuthenticated() ? <UserMenu /> : <AuthModal />}
+</div>
       
       <Header onSearch={handleSearch} />
       
