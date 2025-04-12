@@ -50,8 +50,8 @@ router.post('/upload', auth, upload.single('file'), async (req, res) => {
     await new Promise((resolve, reject) => {
       fs.createReadStream(filePath)
         .pipe(csv({
-          separator: '\t',  // Tab-separated
-          headers: ['Date', 'series', 'OPEN', 'HIGH', 'LOW', 'PREV. CLOltp', 'close', 'vwap', '52W H', '52W L', 'VOLUME', 'VALUE', 'No of trades'],
+          separator: ',',  // Changed from '\t' to ',' to accept comma-separated values
+          headers: ['Date', 'series', 'OPEN', 'HIGH', 'LOW', 'PREV. CLOSE', 'ltp', 'close', 'vwap', '52W H', '52W L', 'VOLUME', 'VALUE', 'No of trades'],
           strict: true,
           skipLines: 1
         }))
@@ -128,8 +128,8 @@ function processStockData(csvData) {
           symbol: defaultSymbol,
           name: defaultName,
           price: parseFloat(row.close) || 0,
-          change: parseFloat(row.close) - parseFloat(row['PREV. CLOltp']) || 0,
-          changePercent: ((parseFloat(row.close) - parseFloat(row['PREV. CLOltp'])) / parseFloat(row['PREV. CLOltp']) * 100) || 0,
+          change: parseFloat(row.close) - parseFloat(row['PREV. CLOSE']) || 0,
+          changePercent: ((parseFloat(row.close) - parseFloat(row['PREV. CLOSE'])) / parseFloat(row['PREV. CLOSE']) * 100) || 0,
           sector: 'Equity',
           marketCap: 0,
           prices: []

@@ -1,4 +1,3 @@
-
 import { Stock, StockPrice } from './StockData';
 import { AuthService } from './AuthService';
 
@@ -70,13 +69,17 @@ export const ApiStockService = {
     formData.append('file', file);
     
     try {
-      const response = await fetch('/api/stocks/upload', {
+      // Use the API_URL variable instead of a relative path
+      const response = await fetch(`${API_URL}/stocks/upload`, {
         method: 'POST',
         headers: {
           'x-auth-token': token,
         },
         body: formData,
       });
+      
+      // Add additional logging for debugging
+      console.log('Upload response status:', response.status);
       
       // Log the raw response for debugging
       const responseText = await response.text();
